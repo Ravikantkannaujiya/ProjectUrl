@@ -6,12 +6,7 @@ const urlSchema = new mongoose.Schema({
     longUrl: {
              type:String ,
              required:true,
-             trim:true,
-             validate: {
-                validator: function(longUrl) {
-                    return /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/.test(longUrl)
-                }
-               }
+             trim:true
              },
     shortUrl: {type:String , required:true, unique:true} 
 
