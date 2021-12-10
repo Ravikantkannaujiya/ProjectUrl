@@ -26,20 +26,44 @@ const urlShortner = async function(req,res){
             return res.status(400).send({status:false,messege:"Please Provide The Required Field"})
         }
         else{
-            const longUrl = req.body.longUrl.trim()
+            var longUrl = req.body.longUrl
+            if(!longUrl){
+               return res.status(400).send({status:false,messege:"Please Provide The LongUrl"})
+            }
             if(!isValid(longUrl)){
-                res.status(400).send({status:false,messege:"Please Provide The LongUrl"})
+              return  res.status(400).send({status:false,messege:"Please Provide The LongUrl"})
             }
+            var longUrl= longUrl.trim()
+
             if(!(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/.test(longUrl))) {
-                res.status(400).send({status: false, message: `This is not a valid Url`})
-                return
+              return  res.status(400).send({status: false, message: `This is not a valid Url`})
+                
             }
+
+            if((longUrl.includes("https://") && longUrl.match(/https:\/\//g).length!==1)||(longUrl.includes("http://") && longUrl.match(/http:\/\//g).length!==1) || (longUrl.includes("ftp://") && longUrl.match(/ftp:\/\//g).length!==1))
+            {
+                 return res.status(400).send({status:false,msg:"Url is not valid"})
+            }
+
+            if(!(/(.com|.org|.co.in|.in|.co|.us)/.test(longUrl))){
+
+                 return res.send("Url is not valid")
+        
+            } 
+
             if(!validUrl.isUri(longUrl)){
-                res.status(400).send({status:false,messege:"The Url Is Not A Valid Url Please Provide The correct Url"})  
+               return res.status(400).send({status:false,messege:"The Url Is Not A Valid Url Please Provide The correct Url"})  
             }
 
             let generate=shortId.generate();
-            let uniqueId=generate.toLowerCase()
+            let uniqueId=generate.toLowerCase();
+
+            //checking if the code already exists
+            let used = await urlModel.findOne({urlCode:uniqueId})
+            if(used){
+                return res.status(400).send({status:false,messege:"It seems You Have To Hit The Api Again"});
+            }
+
             let baseurl = "http://localhost:3000"
             let shortLink = baseurl+`/`+uniqueId;
               
@@ -68,10 +92,6 @@ const urlShortner = async function(req,res){
 
 const geturl = async function(req,res){
     try{
-        let param = req.params
-        if(!param){
-              return res.status(404).send({status:false,messege:"Please Use A Valid Link"})
-        }else{
             let urlCode = req.params.urlCode
             if(!isValid(urlCode)){
                return res.status(400).send({status:false,messege:"Please Use A Valid Link"})
@@ -81,10 +101,10 @@ const geturl = async function(req,res){
               return  res.status(400).send({status:false,messege:"Cant Find What You Are Looking For"})
             }
             let fullUrl = findUrl.longUrl
-            // return res.status(200).send({status:true,Link:fullUrl});
-            res.redirect(fullUrl);
+              return res.status(200).send({status:true,Link:fullUrl});
+             //return res.redirect(fullUrl);
+
             
-            }
         }
 
     }catch(error){
