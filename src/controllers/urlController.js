@@ -57,37 +57,16 @@ const urlShortner = async function (req, res) {
             }
             var longUrl = longUrl.trim()
 
-            if (!(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/.test(longUrl))) {
+            
+
+            if (!(/(:?^((https|http|HTTP|HTTPS){1}:\/\/)(([w]{3})[\.]{1})?([a-zA-Z0-9]{1,}[\.])[\w]*((\/){1}([\w@?^=%&amp;~+#-_.]+))*)$/.test(longUrl))) {
                 return res.status(400).send({ status: false, message: `This is not a valid Url` })
 
             }
 
-            if ((longUrl.includes("https://") && longUrl.match(/https:\/\//g).length !== 1) || (longUrl.includes("http://") && longUrl.match(/http:\/\//g).length !== 1) || (longUrl.includes("ftp://") && longUrl.match(/ftp:\/\//g).length !== 1)) {
-                return res.status(400).send({ status: false, msg: "Url is not valid" })
-            }
-
-            if (!(/(.com|.org|.co.in|.in|.co|.us)/.test(longUrl))) {
-
-                return res.send("Url is not valid")
-
-            }
-
-            if (longUrl.includes("w")&&(longUrl.indexOf("w")===6||longUrl.indexOf("w")===7||longUrl.indexOf("w")===8)) {
-                let arr = [];
-                let i=longUrl.indexOf("w")
-                while (longUrl[i] == "w") {
-                    if (longUrl[i] === "w") { arr.push(longUrl[i]) }
-                    i++
-
-                 }
-
-                 if (!(arr.length === 3)){return res.status(400).send({ status: false, msg: "Url is not valid " })}
-
-            }
-
-            if (!validUrl.isUri(longUrl)) {
-                return res.status(400).send({ status: false, messege: "The Url Is Not A Valid Url Please Provide The correct Url" })
-            }
+            // if (!validUrl.isUri(longUrl)) {
+            //     return res.status(400).send({ status: false, messege: "The Url Is Not A Valid Url Please Provide The correct Url" })
+            // }
 
             //we have to find using long url here
             let find = await urlModel.findOne({longUrl:longUrl}).select({createdAt:0,updatedAt:0,__v:0})
@@ -135,6 +114,7 @@ const urlShortner = async function (req, res) {
 const geturl = async function (req, res) {
     try {
         let urlCode = req.params.urlCode
+        console.log(urlCode);
         if (!isValid(urlCode)) {
             return res.status(400).send({ status: false, messege: "Please Use A Valid Link" })
         } else {
