@@ -3,6 +3,28 @@ const urlModel = require("../models/urlModel")
 const shortId = require('shortid')
 var validUrl = require('valid-url');
 
+const redis = require("redis");
+const {promisify} = require("util");
+
+
+
+//Connection setup for redis
+const redisClient = redis.createClient(
+     14815,
+    "redis-14815.c283.us-east-1-4.ec2.cloud.redislabs.com",
+    {no_ready_check:true}
+
+);
+
+redisClient.auth("1iKTdtbM1DXY3hyEdF9AfVAefZ0XM6Ss",function(err){
+    if(err)throw(err)
+});
+redisClient.on("connect",async function(){
+    console.log("connected to redis....");
+})
+
+const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
+const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
 
 
 
@@ -68,7 +90,7 @@ const urlShortner = async function (req, res) {
             }
 
             //we have to find using long url here
-            let find = await urlModel.findOne({longUrl:longUrl}).select({createdAt:0,updatedAt:0})
+            let find = await urlModel.findOne({longUrl:longUrl}).select({createdAt:0,updatedAt:0,__v:0})
             if(find){
                 return res.status(200).send({status:true,data:find})
             }
@@ -116,13 +138,20 @@ const geturl = async function (req, res) {
         if (!isValid(urlCode)) {
             return res.status(400).send({ status: false, messege: "Please Use A Valid Link" })
         } else {
+            let cacheddata = await GET_ASYNC(`${req.params.urlCode}`)
+            if(cacheddata){
+              let changetype = JSON.parse(cacheddata)
+              return  res.status(302).redirect(changetype.longUrl);
+            }
             let findUrl = await urlModel.findOne({ urlCode: urlCode })
-            if (!findUrl) {
+            if (findUrl) {
+            await SET_ASYNC(`${req.params.urlCode}`,JSON.stringify(findUrl));
+            return res.status(302).redirect(findUrl.longUrl);
+                
+            }else{
                 return res.status(400).send({ status: false, messege: "Cant Find What You Are Looking For" })
             }
-            let fullUrl = findUrl.longUrl
-            // return res.status(200).send({status:true,Link:fullUrl});
-            return res.status(302).redirect(fullUrl);
+
 
 
         }
