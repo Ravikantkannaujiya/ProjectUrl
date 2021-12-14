@@ -69,9 +69,19 @@ const urlShortner = async function (req, res) {
             // }
 
             //we have to find using long url here
-            let find = await urlModel.findOne({longUrl:longUrl}).select({createdAt:0,updatedAt:0,__v:0})
+
+            ////////////////////////////////////////////////////////////////////////////////////////////
+            let cachedlinkdata = await GET_ASYNC(`${req.body.longUrl}`)
+            if(cachedlinkdata){
+              let change = JSON.parse(cachedlinkdata)
+              return res.status(200).send({status:true,redisdata:change})
+            }
+            ////////////////////////////////////////////////////////////////////////////////////////////
+
+            let find = await urlModel.findOne({longUrl:longUrl}).select({createdAt:0,updatedAt:0,__v:0,_id:0})
             if(find){
-                return res.status(200).send({status:true,data:find})
+                await SET_ASYNC(`${req.body.longUrl}`,JSON.stringify(find));
+                return res.status(200).send({status:true,messege:"You should be looking for this",mongodata:find})
             }
             else{
 
@@ -114,7 +124,6 @@ const urlShortner = async function (req, res) {
 const geturl = async function (req, res) {
     try {
         let urlCode = req.params.urlCode
-        console.log(urlCode);
         if (!isValid(urlCode)) {
             return res.status(400).send({ status: false, messege: "Please Use A Valid Link" })
         } else {
@@ -131,9 +140,6 @@ const geturl = async function (req, res) {
             }else{
                 return res.status(400).send({ status: false, messege: "Cant Find What You Are Looking For" })
             }
-
-
-
         }
 
     } catch (error) {
