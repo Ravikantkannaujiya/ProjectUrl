@@ -138,7 +138,7 @@ const geturl = async function (req, res) {
             return res.status(302).redirect(findUrl.longUrl);
                 
             }else{
-                return res.status(400).send({ status: false, messege: "Cant Find What You Are Looking For" })
+                return res.status(404).send({ status: false, messege: "Cant Find What You Are Looking For" })
             }
         }
 
