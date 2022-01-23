@@ -134,7 +134,7 @@ const geturl = async function (req, res) {
             }
             let findUrl = await urlModel.findOne({ urlCode: urlCode })
             if (findUrl) {
-            await SET_ASYNC(`${req.params.urlCode}`,JSON.stringify(findUrl));
+            await SET_ASYNC(`${req.params.urlCode}`,JSON.stringify(findUrl),"EX",20);
             return res.status(302).redirect(findUrl.longUrl);
                 
             }else{
