@@ -68,7 +68,7 @@ const urlShortner = async function (req, res) {
             //     return res.status(400).send({ status: false, messege: "The Url Is Not A Valid Url Please Provide The correct Url" })
             // }
 
-            //we have to find using long url here
+            //we have to find using long url here for shortner
 
             ////////////////////////////////////////////////////////////////////////////////////////////
             let cachedlinkdata = await GET_ASYNC(`${req.body.longUrl}`)
