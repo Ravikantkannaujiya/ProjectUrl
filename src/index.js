@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-mongoose.connect("mongodb+srv://monty-python:SnYUEY4giV9rekw@functionup-backend-coho.0zpfv.mongodb.net/Rkk12_db?retryWrites=true&w=majority", {useNewUrlParser: true})
+mongoose.connect("mongodb+srv://monty-python:SnYUEY4giV9rekw@functionup-backend-coho.0zpfv.mongodb.net/Group-BackendNinja_db?retryWrites=true&w=majority", {useNewUrlParser: true})
     .then(() => console.log('MongoDB is ready for action !'))
     .catch(err => console.log(err))
 
